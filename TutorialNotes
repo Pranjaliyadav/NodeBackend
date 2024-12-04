@@ -1,1 +1,6 @@
 install express and nodemon(as dev dep)
+i body-parser
+
+CORS - Cross Origin Resource Sharing, by defaulti its not allowed
+like client can be running at 4000, servr at 3000
+
