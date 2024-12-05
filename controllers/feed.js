@@ -1,4 +1,6 @@
 const {validationResult} = require('express-validator')
+const PostModel = require('../models/post')
+
 
 exports.getPosts = (req, res, next) =>{
     //will send json response
@@ -31,15 +33,28 @@ exports.createPost = (req, res, next) =>{
 
     const title = req.body.title
     const content = req.body.content
-
-    res.status(201).json({
-        message : 'Post created successfully',
-        post : {_id : new Date().toISOString,
-             title, 
-             content,
-             creator : {name : 'Pranjali'},
-             createdAt : new Date()
-
-            }
+    const newPost = new PostModel({
+        title, 
+        content,
+        imageUrl : 'images/pic.png',
+        creator : {name : 'Pranjali'},
     })
+
+    newPost
+    .save()
+    .then(
+        result =>{
+            console.log("new post result", result)
+            res.status(201).json({
+                message : 'Post created successfully',
+                post : result
+            })
+        }
+    )
+    .catch(err =>{
+        console.log(err)
+    })
+
+
+   
 }
