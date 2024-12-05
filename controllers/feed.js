@@ -5,12 +5,25 @@ const path = require('path')
 
 
 exports.getPosts = (req, res, next) =>{
+    const currentPage = req.query.page || 1
+    const perPage = 2
+    let totalItems
+
     PostModel.find()
+    .countDocuments()
+    .then(count => {
+        totalItems = count
+        return   PostModel.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage)
+    })
+
     .then(posts =>{
 
         res.status(200).json({
             posts : posts,
-            message : 'Fetched posts successfully'
+            message : 'Fetched posts successfully',
+            totalItems
            
         })
     })
@@ -132,6 +145,32 @@ exports.editPost = (req, res, next) =>{
            next(err)
     })
 }
+
+
+exports.deletePost = (req, res, next) =>{
+    const postId = req.params.postId
+    PostModel.findById(postId)
+    .then(post => {
+        if(!post){
+            const error = new Error( 'No Post found!')
+            error.statusCode = 404
+            throw error
+        }
+        clearImage(post.imageUrl)
+        return PostModel.findByIdAndDelete(postId)
+    })
+    .then(result =>{
+        console.log(result)
+        res.status(200).json({message : 'Delete post'})
+    })
+    .catch(err =>{
+        if(!err.statusCode){
+            err.statusCode = 500
+           }
+           next(err)
+    })
+}
+
 
 const clearImage = (filePath) =>{
     filePath = path.join(__dirname, '..', filePath)
