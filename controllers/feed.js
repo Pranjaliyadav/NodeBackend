@@ -1,5 +1,7 @@
 const {validationResult} = require('express-validator')
 const PostModel = require('../models/post')
+const fs = require('fs')
+const path = require('path')
 
 
 exports.getPosts = (req, res, next) =>{
@@ -88,3 +90,50 @@ exports.getSinglePost = (req, res, next) => {
             next(err);
         });
 };
+
+exports.editPost = (req, res, next) =>{
+    const postId = req.params.postId
+    const title = req.body.title
+    const content = req.body.content
+    let imageUrl = req.body.image
+
+    if(req.file){
+        imageUrl = req.file.path.replace("\\" ,"/");
+    }
+
+    if(!imageUrl){
+        const error = new Error( 'No image provided!')
+        error.statusCode = 422
+        throw error
+    }
+
+    PostModel.findById(postId)
+    .then(result =>{
+        if(!result){
+            const error = new Error( 'No Post found!')
+            error.statusCode = 404
+            throw error
+        }
+        if(imageUrl !== result.imageUrl){
+            clearImage(result.imageUrl)
+        }
+        result.title = title
+        result.content = content
+        result.imageUrl = imageUrl
+        return result.save()
+    })
+    .then(result =>{
+        res.status(200).json({message : 'Post updated!', post : result})
+    })
+    .catch(err =>{
+        if(!err.statusCode){
+            err.statusCode = 500
+           }
+           next(err)
+    })
+}
+
+const clearImage = (filePath) =>{
+    filePath = path.join(__dirname, '..', filePath)
+    fs.unlink(filePath, err => console.log(err,"file delete error"))
+}

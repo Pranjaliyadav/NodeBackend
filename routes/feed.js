@@ -23,5 +23,14 @@ router.post('/create-post',
 
 //get single post
 router.get('/post/:postId', feedController.getSinglePost)
+
+router.put('/post/:postId', [
+    body('title')
+    .trim()
+    .isLength({min : 5}),
+    body('content')
+    .trim()
+    .isLength({min : 5})
+], feedController.editPost)
     
 module.exports = router
