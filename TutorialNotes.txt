@@ -1,0 +1,33 @@
+install express and nodemon(as dev dep)
+i body-parser
+
+CORS - Cross Origin Resource Sharing, by defaulti its not allowed
+like client can be running at 4000, servr at 3000
+
+const { v4: uuidv4 } = require('uuid');
+ 
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, 'images');
+    },
+    filename: function(req, file, cb) {
+        cb(null, uuidv4())
+    }
+});
+npm install --save uuid
+
+To ensure that images can be loaded correctly on the frontend, you should also change the logic in the feed.js controller:
+
+in createPosts, change the imageUrl const:
+
+exports.createPost = (req, res, next) => {
+    ...
+    const imageUrl = req.file.path.replace("\\" ,"/");
+    ...
+}
+and in updatePost (once we added that later):
+
+exports.updatePost = (req, res, next) => {
+    ...
+    imageUrl = req.file.path.replace("\\","/");
+}

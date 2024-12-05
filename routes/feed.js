@@ -1,7 +1,6 @@
 const express = require('express')
 const {body} = require('express-validator')
 
-
 const feedController = require('../controllers/feed')
 
 const router = express.Router()
@@ -21,4 +20,8 @@ router.post('/create-post',
     ],
 
     feedController.createPost)
+
+//get single post
+router.get('/post/:postId', feedController.getSinglePost)
+    
 module.exports = router

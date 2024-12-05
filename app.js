@@ -1,4 +1,5 @@
 const express = require('express')
+const path = require('path')
 
 require('dotenv').config();
 const feedRoutes = require('./routes/feed')
@@ -8,6 +9,8 @@ const MONGODB_URI = process.env.MONGO_DB_CONNECTION_STRING
 const app = express()
 
 app.use(bodyParser.json()) //parse incoming json data
+app.use('/images', express.static(path.join(__dirname, 'images'))) //to parse images statically
+
 
 //prevents CORS issues
 app.use((req, res, next)=>{
@@ -18,6 +21,13 @@ app.use((req, res, next)=>{
 })
 
 app.use('/feed', feedRoutes)
+
+app.use((error, req, res, next) =>{
+    console.log(error)
+    const status = error.statusCode
+    const message = error.message
+    res.status(status).json({message })
+})
 
 mongoose.connect(MONGODB_URI)
 .then( res => {
