@@ -31,13 +31,18 @@ exports.createPost = (req, res, next) =>{
        error.statusCode = 422
        throw error
     }
-
+    if(!req.file){
+        const error = new Error( 'No image provided!')
+        error.statusCode = 422
+        throw error
+    }
+    const imageUrl = req.file.path.replace("\\" ,"/");
     const title = req.body.title
     const content = req.body.content
     const newPost = new PostModel({
         title, 
         content,
-        imageUrl : 'images/pic.png',
+        imageUrl :imageUrl,
         creator : {name : 'Pranjali'},
     })
 
