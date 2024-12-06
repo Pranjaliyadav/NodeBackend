@@ -2,6 +2,8 @@ const UserModel = require('../models/user')
 const {validationResult} = require('express-validator')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+require('dotenv').config();
+
 
 exports.userSignup = (req, res, next) =>{
 
@@ -68,7 +70,7 @@ exports.userLogin = (req, res, next) =>{
                 { //values token hold
                 email : loggedUser.email,
                 userId : loggedUser._id.toString()
-            },'secrettoken',{expiresIn : '1h'})
+            },process.env.TOKEN_SECRET_NAME,{expiresIn : '1h'})
 
             res.status(200).json({message : 'logged in', token , userId : loggedUser._id.toString()})
         }
