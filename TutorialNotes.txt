@@ -31,3 +31,5 @@ exports.updatePost = (req, res, next) => {
     ...
     imageUrl = req.file.path.replace("\\","/");
 }
+
+npm i --save jsonwebtoken
