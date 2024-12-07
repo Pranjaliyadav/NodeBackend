@@ -33,3 +33,7 @@ exports.updatePost = (req, res, next) => {
 }
 
 npm i --save jsonwebtoken
+
+Module - async/await
+
+g

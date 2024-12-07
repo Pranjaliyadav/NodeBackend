@@ -4,41 +4,37 @@ const fs = require('fs')
 const path = require('path')
 const UserModel = require('../models/user')
 
-exports.getPosts = (req, res, next) =>{
+exports.getPosts = async (req, res, next) =>{
     const currentPage = req.query.page || 1
     const perPage = 2
     let totalItems
 
-    PostModel.find()
-    .countDocuments()
-    .then(count => {
-        totalItems = count
-        return   PostModel.find()
+    try{
+        const totalItems = await  PostModel.find()
+        .countDocuments()
+        const posts = await PostModel.find()
         .skip((currentPage - 1) * perPage)
         .limit(perPage)
-    })
 
-    .then(posts =>{
-        let modifiedPost = posts
-         
         res.status(200).json({
             posts : posts,
             message : 'Fetched posts successfully',
             totalItems
            
         })
-    })
-    .catch(err =>{
+
+    }
+    catch(err){
         if(!err.statusCode){
-               err.statusCode = 500
-              }
-              next(err)
-           })
-    //will send json response
+            err.statusCode = 500
+           }
+           next(err)
+    }
+    
     
 }
 
-exports.createPost = (req, res, next) =>{
+exports.createPost =async (req, res, next) =>{
     const errors = validationResult(req)
     const userId = req.userId
     let creator
@@ -63,60 +59,55 @@ exports.createPost = (req, res, next) =>{
         creator : userId
     })
 
-    newPost
-    .save()
-    .then(result =>{
-        return UserModel.findById(userId)
-    })
-    .then(result =>{
-        creator = result
-        result.posts.push(newPost)
-        return result.save()
-    })
-    .then(
-        result =>{
-         
-            console.log("new post result", result)
-            res.status(201).json({
-                message : 'Post created successfully',
-                post : newPost,
-                creator : {_id : creator._id.toString(), name : creator.name}
-            })
-        }
-    )
-    .catch(err =>{
-       if(!err.statusCode){
-        err.statusCode = 500
-       }
-       next(err)
-    })
+    try{
 
+        await  newPost.save()
+        const userFound = await UserModel.findById(userId)
+        creator = userFound
+        userFound.posts.push(newPost)
+        await userFound.save()
+        res.status(201).json({
+            message : 'Post created successfully',
+            post : newPost,
+            creator : {_id : creator._id.toString(), name : creator.name}
+        })
+    }
+    catch(err){
+        if(!err.statusCode){
+            err.statusCode = 500
+           }
+           next(err)
+    }
+   
+   
    
    
 }
-exports.getSinglePost = (req, res, next) => {
+exports.getSinglePost = async (req, res, next) => {
     const postId = req.params.postId;
-    PostModel.findById(postId)
-        .then(post => {
-            if (!post) {
-                const error = new Error('Post could not be found!');
-                error.statusCode = 404;
-                throw error;
-            }
-            res.status(200).json({
-                message: 'Post fetched',
-                post: post,
-            });
-        })
-        .catch(err => {
-            if (!err.statusCode) {
-                err.statusCode = 500;
-            }
-            next(err);
+    try{
+
+        const post = await PostModel.findById(postId)
+        if (!post) {
+            const error = new Error('Post could not be found!');
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json({
+            message: 'Post fetched',
+            post: post,
         });
+    }
+    catch(err){
+        if(!err.statusCode){
+            err.statusCode = 500
+           }
+           next(err)
+    }
+
 };
 
-exports.editPost = (req, res, next) =>{
+exports.editPost = async (req, res, next) =>{
     const postId = req.params.postId
     const title = req.body.title
     const content = req.body.content
@@ -132,8 +123,8 @@ exports.editPost = (req, res, next) =>{
         throw error
     }
 
-    PostModel.findById(postId)
-    .then(result =>{
+    try{
+        const result = await  PostModel.findById(postId)
         if(!result){
             const error = new Error( 'No Post found!')
             error.statusCode = 404
@@ -150,24 +141,25 @@ exports.editPost = (req, res, next) =>{
         result.title = title
         result.content = content
         result.imageUrl = imageUrl
-        return result.save()
-    })
-    .then(result =>{
+        await result.save()
         res.status(200).json({message : 'Post updated!', post : result})
-    })
-    .catch(err =>{
+   
+    }
+    catch(err){
         if(!err.statusCode){
             err.statusCode = 500
            }
            next(err)
-    })
+    }
+   
 }
 
 
-exports.deletePost = (req, res, next) =>{
+exports.deletePost = async (req, res, next) =>{
     const postId = req.params.postId
-    PostModel.findById(postId)
-    .then(post => {
+    try{
+        const post = await 
+        PostModel.findById(postId)
         if(!post){
             const error = new Error('No Post found!')
             error.statusCode = 404
@@ -179,26 +171,20 @@ exports.deletePost = (req, res, next) =>{
             throw error
         }
         clearImage(post.imageUrl)
-        return PostModel.findByIdAndDelete(postId)
-    })
-    .then(result =>{
-        return UserModel.findById(req.userId)
-
-    })
-    .then(result => {
+        await PostModel.findByIdAndDelete(postId)
+        const result = await UserModel.findById(req.userId)
         result.posts.pull(postId)
-        return result.save()
-    })
-    .then(result =>{
-        console.log(result)
+        await result.save()
         res.status(200).json({message : 'Delete post'})
-    })
-    .catch(err =>{
+    }
+    catch(err){
         if(!err.statusCode){
             err.statusCode = 500
            }
            next(err)
-    })
+    }
+   
+   
 }
 
 
