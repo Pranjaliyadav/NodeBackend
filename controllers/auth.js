@@ -83,3 +83,50 @@ exports.userLogin = (req, res, next) =>{
          
   })
 }
+
+exports.getUserStatus = (req, res, next) =>{
+    const userId = req.userId
+    UserModel.findById(userId)
+    .then(
+        user =>{
+            res.status(200).json({message : 'user status returned', status : user.status})
+        }
+    )
+    .catch(err => {
+        if(!err.statusCode){
+            err.statusCode = 500
+           }
+           next(err)
+    })
+}
+
+exports.updateUserStatus = (req, res, next) =>{
+
+    const userId = req.userId
+    const errors = validationResult(req)
+    console.log("here statu", req.body.status, req.body)
+    if(!errors.isEmpty()){
+        const error = new Error('Invalid status!')
+        error.statusCode = 400
+        throw error
+    }
+    UserModel.findById(userId)
+    .then(
+        user =>{
+            user.status = req.body.status
+            return user.save()
+        }
+    )
+    .then(
+        result => {
+            res.status(200).json({message : 'Updated status'})
+        }
+    )
+    .catch(err => {
+        if(!err.statusCode){
+            err.statusCode = 500
+           }
+           next(err)
+    })
+
+}
