@@ -62,8 +62,16 @@ app.use((error, req, res, next) =>{
 mongoose.connect(MONGODB_URI)
 .then( res => {
     console.log("connected to mongoose")
-    app.listen(8080)
+    const server =  app.listen(8080)
     
+    const sio = require('socket.io')(server,  { cors: { origin: 'http://localhost:3000' } });
+    
+    sio.on("connection", () => {
+        console.log("Connected to client!");
+    });
+
+
+
 })
 .catch(err =>{
     console.log(err)

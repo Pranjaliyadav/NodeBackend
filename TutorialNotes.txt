@@ -36,4 +36,8 @@ npm i --save jsonwebtoken
 
 Module - async/await
 
-g
+Module - web sockets
+websockets are established via http
+server can push data to client without client making a request
+socket.io can be used
+npm i --save socket.io
