@@ -187,7 +187,7 @@ exports.deletePost = (req, res, next) =>{
     })
     .then(result => {
         result.posts.pull(postId)
-        return result
+        return result.save()
     })
     .then(result =>{
         console.log(result)
