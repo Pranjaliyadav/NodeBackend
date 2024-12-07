@@ -2,7 +2,7 @@ const {validationResult} = require('express-validator')
 const PostModel = require('../models/post')
 const fs = require('fs')
 const path = require('path')
-
+const UserModel = require('../models/user')
 
 exports.getPosts = (req, res, next) =>{
     const currentPage = req.query.page || 1
@@ -19,7 +19,8 @@ exports.getPosts = (req, res, next) =>{
     })
 
     .then(posts =>{
-
+        let modifiedPost = posts
+         
         res.status(200).json({
             posts : posts,
             message : 'Fetched posts successfully',
@@ -39,7 +40,8 @@ exports.getPosts = (req, res, next) =>{
 
 exports.createPost = (req, res, next) =>{
     const errors = validationResult(req)
-
+    const userId = req.userId
+    let creator
     if(!errors.isEmpty()){
 
        const error = new Error( 'Validation failed, entered data is incorrect!')
@@ -58,17 +60,27 @@ exports.createPost = (req, res, next) =>{
         title, 
         content,
         imageUrl :imageUrl,
-        creator : {name : 'Pranjali'},
+        creator : userId
     })
 
     newPost
     .save()
+    .then(result =>{
+        return UserModel.findById(userId)
+    })
+    .then(result =>{
+        creator = result
+        result.posts.push(newPost)
+        return result.save()
+    })
     .then(
         result =>{
+         
             console.log("new post result", result)
             res.status(201).json({
                 message : 'Post created successfully',
-                post : result
+                post : newPost,
+                creator : {_id : creator._id.toString(), name : creator.name}
             })
         }
     )
@@ -127,6 +139,11 @@ exports.editPost = (req, res, next) =>{
             error.statusCode = 404
             throw error
         }
+        if(result.creator.toString() !== req.userId){
+            const error = new Error( 'Forbidden')
+            error.statusCode = 403
+            throw error
+        }
         if(imageUrl !== result.imageUrl){
             clearImage(result.imageUrl)
         }
@@ -152,12 +169,25 @@ exports.deletePost = (req, res, next) =>{
     PostModel.findById(postId)
     .then(post => {
         if(!post){
-            const error = new Error( 'No Post found!')
+            const error = new Error('No Post found!')
             error.statusCode = 404
+            throw error
+        }
+        if(post.creator.toString() !== req.userId){
+            const error = new Error('Forbidden')
+            error.statusCode = 403
             throw error
         }
         clearImage(post.imageUrl)
         return PostModel.findByIdAndDelete(postId)
+    })
+    .then(result =>{
+        return UserModel.findById(req.userId)
+
+    })
+    .then(result => {
+        result.posts.pull(postId)
+        return result
     })
     .then(result =>{
         console.log(result)
