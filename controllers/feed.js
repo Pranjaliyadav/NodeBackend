@@ -3,11 +3,13 @@ const PostModel = require('../models/post')
 const fs = require('fs')
 const path = require('path')
 const UserModel = require('../models/user')
+const io = require('../socket')
+const post = require('../models/post')
+
 
 exports.getPosts = async (req, res, next) =>{
     const currentPage = req.query.page || 1
     const perPage = 2
-    let totalItems
 
     try{
         const totalItems = await  PostModel.find()
@@ -67,6 +69,15 @@ exports.createPost =async (req, res, next) =>{
         creator = userFound
         userFound.posts.push(newPost)
         await userFound.save()
+
+        //.emit() will send to all
+        //.broadcast() will send to everyone except the one who sent request.
+        io.getIO().emit('create-post', //event name 
+            { //data u want to send
+            action : 'create',
+            post : newPost}
+        )
+
         res.status(201).json({
             message : 'Post created successfully',
             post : newPost,
