@@ -16,6 +16,7 @@ exports.getPosts = async (req, res, next) =>{
         .countDocuments()
         const posts = await PostModel.find()
         .populate('creator')
+        .sort({createdAt : -1})
         .skip((currentPage - 1) * perPage)
         .limit(perPage)
 
@@ -72,7 +73,7 @@ exports.createPost =async (req, res, next) =>{
 
         //.emit() will send to all
         //.broadcast() will send to everyone except the one who sent request.
-        io.getIO().emit('create-post', //event name 
+        io.getIO().emit('posts', //event name 
             { //data u want to send
             action : 'create',
             post : {...newPost._doc, creator : {_id : req.userId, name : userFound.name}}
@@ -137,24 +138,31 @@ exports.editPost = async (req, res, next) =>{
     }
 
     try{
-        const result = await  PostModel.findById(postId)
+        const result = await  PostModel.findById(postId).populate('creator')
         if(!result){
             const error = new Error( 'No Post found!')
             error.statusCode = 404
             throw error
         }
-        if(result.creator.toString() !== req.userId){
+        if(result.creator._id.toString() !== req.userId){
             const error = new Error( 'Forbidden')
             error.statusCode = 403
             throw error
         }
         if(imageUrl !== result.imageUrl){
+            console.log("here fin ")
             clearImage(result.imageUrl)
         }
         result.title = title
         result.content = content
         result.imageUrl = imageUrl
-        await result.save()
+      const post =   await result.save()
+        io.getIO().emit('posts', //event name 
+            { //data u want to send
+            action : 'edit',
+            post : post
+        }
+        )
         res.status(200).json({message : 'Post updated!', post : result})
    
     }
@@ -188,6 +196,12 @@ exports.deletePost = async (req, res, next) =>{
         const result = await UserModel.findById(req.userId)
         result.posts.pull(postId)
         await result.save()
+        io.getIO().emit('posts', //event name 
+            { //data u want to send
+            action : 'delete',
+            post : postId
+        }
+        )
         res.status(200).json({message : 'Delete post'})
     }
     catch(err){
