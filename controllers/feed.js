@@ -75,7 +75,8 @@ exports.createPost =async (req, res, next) =>{
         io.getIO().emit('create-post', //event name 
             { //data u want to send
             action : 'create',
-            post : newPost}
+            post : {...newPost._doc, creator : {_id : req.userId, name : userFound.name}}
+        }
         )
 
         res.status(201).json({
