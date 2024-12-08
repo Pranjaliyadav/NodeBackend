@@ -1,10 +1,12 @@
-module.exports = {
-    hello() {
-        return {
-            text : 'Hellowww',
-            views : 124
+const resolvers = {
+    Query: {
+        hello: () => {
+            return {
+                text: 'Hellowww',
+                views: 124
+            };
         }
     }
-}
+};
 
-//so here we define funtions, function name should match query name from schema
+module.exports = resolvers;
