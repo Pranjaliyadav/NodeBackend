@@ -1,6 +1,7 @@
 const UserModel = require('../models/user')
 const PostModel = require('../models/post')
 const bcrypt = require('bcrypt')
+const validator = require('validator')
 
 
 const resolvers = {
@@ -10,6 +11,25 @@ const resolvers = {
     Mutation : {
         signupUser : async(_, {userInput}, req) =>{
             const {email , password, name} = userInput
+            const errors = []
+            if(!validator.isEmail(email)){
+                errors.push({message : 'E-Mail is invalid!'})
+
+            }
+            if(validator.isEmpty(password) || !validator.isLength(password, {min : 5})){
+                errors.push({message : 'Password is too short!'})
+            }
+           
+            if(validator.isEmpty(name) || !validator.isLength(name, {min : 2})){
+                errors.push({message : 'Name is too short!'})
+            }
+
+            if(errors.length > 0){
+                const error = new Error('Invalid input')
+                throw error
+            }
+
+
             const existingUser = await UserModel.findOne({email})
             if(existingUser){
                 const error = new Error('User exists already!')
