@@ -1,12 +1,57 @@
+const UserModel = require('../models/user')
+const PostModel = require('../models/post')
+const bcrypt = require('bcrypt')
+
+
 const resolvers = {
     Query: {
-        hello: () => {
-            return {
-                text: 'Hellowww',
-                views: 124
-            };
+       
+    },
+    Mutation : {
+        signupUser : async(_, {userInput}, req) =>{
+            const {email , password, name} = userInput
+            const existingUser = await UserModel.findOne({email})
+            if(existingUser){
+                const error = new Error('User exists already!')
+                throw error
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 12)
+            const user = new UserModel({
+                email,
+                password : hashedPassword,
+                name
+            })
+
+            const createdUser = await user.save()
+            return {...createdUser._doc, _id : createdUser._id.toString()} //createdUser._doc contains only actual data, exclude metadata
         }
     }
 };
 
 module.exports = resolvers;
+
+
+/** usage example of querya nd mutation 
+ *  Query: {
+        placeholder: () => {
+            return "This is a placeholder query.";
+        },
+    },
+    Mutation: {
+        signup: async (_, { userInput }) => {
+            const { email, password, name } = userInput;
+            // Add your logic here (e.g., save the user to the database)
+            const newUser = {
+                _id: "1", // Normally, this comes from your database
+                name,
+                email,
+                password,
+                status: "Active",
+                posts: [],
+            };
+            return newUser;
+        },
+    },
+ * 
+ */

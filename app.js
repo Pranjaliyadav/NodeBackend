@@ -131,6 +131,7 @@ const startServer = async () => {
         typeDefs, // Your GraphQL schema
         resolvers, // Your resolvers
         context: ({ req }) => ({ req }), // Pass request to context if needed
+        playground : true
     });
 
     await server.start(); // Start the Apollo Server

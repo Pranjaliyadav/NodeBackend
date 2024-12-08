@@ -50,3 +50,21 @@ graphql only has POST request. query expression can be sent to define the data t
 define query defination, mutation def, subscrption def
 npm i --save graphql express-graphql
 https://graphql.org/learn/
+
+call - 
+mutation{
+  signupUser(userInput: {email : "ts@ts.ts", name : "pran", password : "hellls"}) {
+    _id
+    email 
+  }
+}
+
+result - 
+{
+  "data": {
+    "signupUser": {
+      "_id": "6755ec91e6392fcac4b9358f",
+      "email": "ts@ts.ts"
+    }
+  }
+}
