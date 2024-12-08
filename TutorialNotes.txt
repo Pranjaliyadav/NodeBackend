@@ -41,3 +41,12 @@ websockets are established via http
 server can push data to client without client making a request
 socket.io can be used
 npm i --save socket.io
+
+Module - graphql
+with rest api - stateless, client independent api for exchanging data
+graphql - same as rest just with higher query flexibility
+
+graphql only has POST request. query expression can be sent to define the data that should be returned
+define query defination, mutation def, subscrption def
+npm i --save graphql express-graphql
+https://graphql.org/learn/
