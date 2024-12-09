@@ -2,11 +2,49 @@ const UserModel = require('../models/user')
 const PostModel = require('../models/post')
 const bcrypt = require('bcrypt')
 const validator = require('validator')
+const jwt = require('jsonwebtoken')
+require('dotenv').config();
 
 
 const resolvers = {
     Query: {
-       
+       loginUser : async(_, {userInput}, req) =>{
+            const {email, password} = userInput
+            const errors = []
+
+            if(!validator.isEmail(email)){
+                errors.push({message : 'E-Mail is invalid!'})
+
+            }
+            if(validator.isEmpty(password) || !validator.isLength(password, {min : 5})){
+                errors.push({message : 'Password is too short!'})
+            }
+            const user = await UserModel.findOne({email})
+            if(!user){
+                const error = new Error('User not found!')
+                error.status = 404
+                throw error
+            }
+
+            const isEqual = await bcrypt.compare(password, user.password)
+            if(!isEqual) {
+                const error = new Error('Incorrect password!')
+                error.status = 401
+                throw error
+            }
+
+            const token = jwt.sign({
+                userId : user._id.toString(),
+                email : user.email,
+
+            },
+            process.env.TOKEN_SECRET_NAME,
+            {expiresIn : '1h'}
+
+        )
+
+
+       }
     },
     Mutation : {
         signupUser : async(_, {userInput}, req) =>{

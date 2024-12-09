@@ -21,19 +21,30 @@ const typeDefs = gql`
         posts: [Post!]!
     }
 
+    type AuthData { 
+        token : String!
+        userId : String!
+    }
+
     input signUpData {
         email: String!
         password: String!
         name: String!
     }
 
+
+    input loginData { 
+        email : String!
+        password : String!
+    }
+
     type Mutation {
         signupUser(userInput: signUpData): User!
+       
     }
 
     type Query {
-        
-        placeholder: String # Add at least one field to prevent syntax errors
+        loginUser(userInput : loginData) : AuthData!
     }
 `;
 
