@@ -38,10 +38,14 @@ const resolvers = {
                 email : user.email,
 
             },
+
             process.env.TOKEN_SECRET_NAME,
             {expiresIn : '1h'}
 
         )
+
+         return {token, userId : user._id.toString()}
+
 
 
        }
