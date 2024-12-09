@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const resolvers = {
     Query: {
-       loginUser : async(_, {userInput}, req) =>{
+       loginUser : async(_, {userInput}, {req}) =>{
             const {email, password} = userInput
             const errors = []
 
@@ -48,10 +48,34 @@ const resolvers = {
 
 
 
+       },
+
+       getPosts : async (_,argss,{req}) =>{
+        if(!req.isAuth){
+            const error = new Error('Not Authenticated!')
+            error.code = 401
+            throw error
+        }
+
+        const totalPosts = await PostModel.find().countDocuments()
+        const posts = await PostModel.find()
+                    .sort({createdAt : -1})
+                    .populate('creator')
+         return {posts : posts.map(p =>{
+            return {
+                ...p._doc, 
+                _id : p._id.toString(), 
+                createdAt : p.createdAt.toISOString(),
+                 updatedAt : p.updatedAt.toISOString()}
+         }),
+        totalPosts 
+        }
+
+
        }
     },
     Mutation : {
-        signupUser : async(_, {userInput}, req) =>{
+        signupUser : async(_, {userInput}, {req}) =>{
             const {email , password, name} = userInput
             const errors = []
             if(!validator.isEmail(email)){
@@ -89,6 +113,52 @@ const resolvers = {
 
             const createdUser = await user.save()
             return {...createdUser._doc, _id : createdUser._id.toString()} //createdUser._doc contains only actual data, exclude metadata
+        },
+        createPost : async(_, {postCreateInput} , {req}) =>{
+        if(!req.isAuth){
+                const error = new Error('Not Authenticated!')
+                error.code = 401
+                throw error
+            }
+
+            const {title, content, imageUrl} = postCreateInput
+            const errors = []
+
+            if(validator.isEmpty(title) || !validator.isLength(title, {min : 5})){
+                errors.push({message : 'Title is invalid!'})
+            }
+            if(validator.isEmpty(content) || !validator.isLength(content, {min : 5})){
+                errors.push({message : 'Content is invalid!'})
+            }
+            if(errors.length > 0){
+                const error = new Error('Invalid input')
+                error.data = errors
+                error.code = 422
+                throw error
+            }
+            const user = await UserModel.findById(req.userId)
+            if(!user){
+                const error = new Error('User not foun1')
+                error.data = errors
+                error.code = 422
+                throw error
+            }
+
+            const post  = new PostModel({
+                title,
+                content,
+                imageUrl,
+                creator : user
+            })
+
+
+            const createdPost = await post.save()
+            user.posts.push(createdPost)
+            await user.save()
+
+            return {...createdPost._doc, _id : createdPost._id.toString(), createdAt : createdPost.createdAt.toISOString(), updatedAt : createdPost.updatedAt.toISOString()}
+
+
         }
     }
 };
