@@ -77,6 +77,26 @@ const resolvers = {
         }
 
 
+       },
+       getPostById : async(_,{id},{req} ) =>{
+        if(!req.isAuth){
+            const error = new Error('Not Authenticated!')
+            error.code = 401
+            throw error
+        }
+        const post = await PostModel.findById(id)
+        .populate('creator')
+        if(!post){
+            const error = new Error('Post not found')
+            error.code = 404
+            throw error
+        }
+        return {
+            ...post._doc,
+            _id : post._id.toString(),
+            createdAt : post.createdAt.toISOString(),
+            updatedAt : post.updatedAt.toISOString()
+        }
        }
     },
     Mutation : {
@@ -143,7 +163,7 @@ const resolvers = {
             }
             const user = await UserModel.findById(req.userId)
             if(!user){
-                const error = new Error('User not foun1')
+                const error = new Error('User not found')
                 error.data = errors
                 error.code = 422
                 throw error

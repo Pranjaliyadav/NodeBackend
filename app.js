@@ -51,7 +51,7 @@ app.use((req, res, next) => {
 app.use(isAuth)
 
 app.put('/post-image', (req, res, next)=>{
-    console.lo
+  
     if(!req.isAuth){
         throw new Error('Not Authenticated')
     }

@@ -61,6 +61,7 @@ const typeDefs = gql`
     type Query {
         loginUser(userInput : loginData) : AuthData!
         getPosts(page : Int!) : getPostsData!
+        getPostById(id : ID!) : Post!
     }
 `;
 
