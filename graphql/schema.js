@@ -60,7 +60,7 @@ const typeDefs = gql`
 # all get queries
     type Query {
         loginUser(userInput : loginData) : AuthData!
-        getPosts : getPostsData!
+        getPosts(page : Int!) : getPostsData!
     }
 `;
 

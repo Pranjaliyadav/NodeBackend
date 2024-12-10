@@ -50,16 +50,21 @@ const resolvers = {
 
        },
 
-       getPosts : async (_,argss,{req}) =>{
+       getPosts : async (_,{page},{req}) =>{
         if(!req.isAuth){
             const error = new Error('Not Authenticated!')
             error.code = 401
             throw error
         }
-
+        if(!page){
+            page =1
+        }
+        const perPage = 2
         const totalPosts = await PostModel.find().countDocuments()
         const posts = await PostModel.find()
                     .sort({createdAt : -1})
+                    .skip((page - 1)*perPage)
+                    .limit(perPage)
                     .populate('creator')
          return {posts : posts.map(p =>{
             return {
