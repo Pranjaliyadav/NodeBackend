@@ -97,6 +97,22 @@ const resolvers = {
             createdAt : post.createdAt.toISOString(),
             updatedAt : post.updatedAt.toISOString()
         }
+       },
+       getUserStatus : async(_,{argss}, {req}) =>{
+        const userId = req.userId.toString()
+        if(!req.isAuth){
+            const error = new Error('Not Authenticated!')
+            error.code = 401
+            throw error
+        }
+
+        const user = await UserModel.findById(userId)
+        if(!user){
+            const error = new Error('User not found!')
+            error.code = 404
+            throw error
+        }
+        return {...user._doc, _id : user._id.toString()}
        }
     },
     Mutation : {
@@ -257,7 +273,36 @@ const resolvers = {
             result.posts.pull(id)
             await result.save()
             return true
-        }
+        },
+        updateUserStatus : async(_,{updatedStatus}, {req}) =>{
+            const errors = []
+
+            if(validator.isEmpty(updatedStatus) || !validator.isLength(updatedStatus, {min : 1})){
+                errors.push({message : 'Status is invalid!'})
+            }
+            if(errors.length > 0){
+                const error = new Error('Invalid input')
+                error.data = errors
+                error.code = 422
+                throw error
+            }
+            const userId = req.userId.toString()
+            if(!req.isAuth){
+                const error = new Error('Not Authenticated!')
+                error.code = 401
+                throw error
+            }
+    
+            const user = await UserModel.findById(userId)
+            if(!user){
+                const error = new Error('User not found!')
+                error.code = 404
+                throw error
+            }
+            user.status = updatedStatus
+            await user.save()
+            return true
+           }
 
     }
 };
