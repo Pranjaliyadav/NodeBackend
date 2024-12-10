@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 const validator = require('validator')
 const jwt = require('jsonwebtoken')
 require('dotenv').config();
-
+const {clearImage}  = require('../utils/file')
 
 const resolvers = {
     Query: {
@@ -230,6 +230,33 @@ const resolvers = {
             const updatedPost = await post.save()
 
             return {...updatedPost._doc, _id : updatedPost._id.toString(), createdAt : updatedPost.createdAt.toISOString(), updatedAt : updatedPost.updatedAt.toISOString()}
+        },
+
+        deletePost : async(_,{id},{req}) => {
+            if(!req.isAuth){
+                const error = new Error('Not Authenticated!')
+                error.code = 401
+                throw error
+            }
+
+            const post = await PostModel.findById(id)
+            if(!post){
+                const error = new Error('Post not found')
+                error.code = 404
+                throw error
+            }
+
+            if(post.creator.toString() !== req.userId.toString()){
+                const error = new Error('Forbidden')
+                error.statusCode = 403
+                throw error
+            }
+            clearImage(post.imageUrl)
+            await PostModel.findByIdAndDelete(id)
+            const result = await UserModel.findById(req.userId)
+            result.posts.pull(id)
+            await result.save()
+            return true
         }
 
     }

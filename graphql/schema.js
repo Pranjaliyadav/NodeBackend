@@ -56,6 +56,7 @@ const typeDefs = gql`
         signupUser(userInput: signUpData): User!
         createPost(postCreateInput :postCreateInputData ) : Post!
        updatePost(id : ID!, postUpdateInput : postCreateInputData!) : Post!
+       deletePost(id : ID!) : Boolean
     }
 # all get queries
     type Query {

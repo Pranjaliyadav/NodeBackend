@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs')
+const {clearImage}  = require('./utils/file')
 const multer = require('multer');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -14,6 +14,7 @@ const resolvers = require('./graphql/resolvers'); // Replace with your resolver 
 const isAuth = require('./middleware/is-auth')
 // Initialize Express app
 const app = express();
+
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
@@ -116,9 +117,3 @@ mongoose
         });
     })
     .catch(err => console.error('Failed to connect to MongoDB:', err));
-
-    const clearImage = (filePath) =>{
-        filePath = path.join(__dirname, '..', filePath)
-        fs.unlink(filePath, err => console.log(err,"file delete error"))
-    }
-    
