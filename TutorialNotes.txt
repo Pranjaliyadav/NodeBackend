@@ -68,3 +68,7 @@ result -
     }
   }
 }
+
+
+graphql only takes json data. so file cant be directly uploaded through query
+use REST api for that
