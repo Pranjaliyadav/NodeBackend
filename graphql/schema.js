@@ -55,7 +55,7 @@ const typeDefs = gql`
     type Mutation {
         signupUser(userInput: signUpData): User!
         createPost(postCreateInput :postCreateInputData ) : Post!
-       
+       updatePost(id : ID!, postUpdateInput : postCreateInputData!) : Post!
     }
 # all get queries
     type Query {

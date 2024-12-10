@@ -184,7 +184,54 @@ const resolvers = {
             return {...createdPost._doc, _id : createdPost._id.toString(), createdAt : createdPost.createdAt.toISOString(), updatedAt : createdPost.updatedAt.toISOString()}
 
 
+        },
+        updatePost : async(_, {id,postUpdateInput}, {req}) =>{
+            if(!req.isAuth){
+                const error = new Error('Not Authenticated!')
+                error.code = 401
+                throw error
+            }
+            
+            const {title, content,imageUrl} = postUpdateInput
+            const errors = []
+
+            if(validator.isEmpty(title) || !validator.isLength(title, {min : 5})){
+                errors.push({message : 'Title is invalid!'})
+            }
+            if(validator.isEmpty(content) || !validator.isLength(content, {min : 5})){
+                errors.push({message : 'Content is invalid!'})
+            }
+            if(errors.length > 0){
+                const error = new Error('Invalid input')
+                error.data = errors
+                error.code = 422
+                throw error
+            }
+
+            const post = await PostModel.findById(id).populate('creator')
+            if(!post){
+                const error = new Error('Post not found')
+                error.code = 404
+                throw error
+            }
+            if(post.creator._id.toString() !== req.userId.toString()){
+                const error = new Error('Not authorized to delete')
+                error.code = 403
+                throw error
+            }
+
+            post.title = title
+            if(imageUrl !== 'undefined'){
+
+                post.imageUrl = imageUrl
+            }
+            post.content = content
+
+            const updatedPost = await post.save()
+
+            return {...updatedPost._doc, _id : updatedPost._id.toString(), createdAt : updatedPost.createdAt.toISOString(), updatedAt : updatedPost.updatedAt.toISOString()}
         }
+
     }
 };
 
