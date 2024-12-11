@@ -72,3 +72,16 @@ result -
 
 graphql only takes json data. so file cant be directly uploaded through query
 use REST api for that
+
+how to prepare code for production
+
+- use environment variables - avoid hard coded values in your code
+- use production API keys - dont use that testing stripe API
+- reduce error output details - dont send senstive info to your users
+- set secure response headers - impleent best practices
+- add asset compression - reduce response size
+- configure logging - stay up to date abt whats happening 
+- use SSL/TLS - encrypt data in transit
+
+npm i --save helmet 
+adds headers 

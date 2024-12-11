@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { ApolloServer } = require('apollo-server-express');
 require('dotenv').config();
-
+const helmet = require('helmet')
 const MONGODB_URI = process.env.MONGO_DB_CONNECTION_STRING;
 const { v4: uuidv4 } = require('uuid');
 const typeDefs = require('./graphql/schema'); // Replace with your schema definition
@@ -111,7 +111,7 @@ mongoose
         return startServer(); // Start Apollo Server
     })
     .then(() => {
-        app.listen(8080, () => {
+        app.listen(process.env.PORT_NO, () => {
             console.log('Server running on http://localhost:8080');
             console.log('GraphQL endpoint at http://localhost:8080/graphql');
         });
