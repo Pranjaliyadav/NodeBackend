@@ -32,6 +32,10 @@ const typeDefs = gql`
 
     }
 
+    type userStatus { 
+        status : String!
+    }
+
     input signUpData {
         email: String!
         password: String!
@@ -51,16 +55,23 @@ const typeDefs = gql`
     }
 
 
+
+
 # all post query
     type Mutation {
         signupUser(userInput: signUpData): User!
         createPost(postCreateInput :postCreateInputData ) : Post!
-       
+       updatePost(id : ID!, postUpdateInput : postCreateInputData!) : Post!
+       deletePost(id : ID!) : Boolean
+       updateUserStatus(updatedStatus : String!) : Boolean
+
     }
 # all get queries
     type Query {
         loginUser(userInput : loginData) : AuthData!
-        getPosts : getPostsData!
+        getPosts(page : Int!) : getPostsData!
+        getPostById(id : ID!) : Post!
+        getUserStatus : User!
     }
 `;
 

@@ -22,8 +22,7 @@ module.exports = (req, res, next) =>{
         req.isAuth = false
        return next()
     }
-    console.log("here reached", decodedToken.userId, decodedToken)
-    req.userId = decodedToken.userId
+   req.userId = decodedToken.userId
     req.isAuth = true
     next()
 }
