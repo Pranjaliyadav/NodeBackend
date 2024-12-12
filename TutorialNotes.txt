@@ -36,4 +36,13 @@ npm i --save jsonwebtoken
 
 Module - async/await
 
-g
+
+ 
+ Module  - Testing module
+ automated code Testing
+ Mocha to be used here, Chai also to be used and sinon
+
+ npm i --save mocha chai
+
+ mocha is responsible our test, chai is for definign our success condition
+ npm install chai@4.3.4
