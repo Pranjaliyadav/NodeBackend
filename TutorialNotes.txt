@@ -85,3 +85,20 @@ how to prepare code for production
 
 npm i --save helmet 
 adds headers 
+
+
+make target - es6
+module - commonjs
+moduleResolution - node 
+in tsconfig.json
+to work with both express and ts in node
+
+
+Deno ? 
+
+js runtime based on chrome's v8 js engine
+deno supports js and ts
+has inbuilt ts compiler
+suports url imports and modern js features eg promises
+secure by default and requires explicit execution permission
+
